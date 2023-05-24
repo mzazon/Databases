@@ -85,7 +85,7 @@ class CdkAwsCookbook402Stack(Stack):
             engine=rds.DatabaseInstanceEngine.mysql(
                 version=rds.MysqlEngineVersion.VER_8_0_23
             ),
-            instance_type=ec2.InstanceType("m5.large"),
+            instance_type=ec2.InstanceType("db.t3.medium"),
             vpc=vpc,
             database_name='AWSCookbookRecipe402',
             instance_identifier='awscookbookrecipe402',
