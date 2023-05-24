@@ -83,7 +83,7 @@ class CdkAwsCookbook402Stack(Stack):
             self,
             'DBInstance',
             engine=rds.DatabaseInstanceEngine.mysql(
-                version=rds.MysqlEngineVersion.VER_8_0_23
+                version=rds.MysqlEngineVersion.VER_8_0
             ),
             instance_type=ec2.InstanceType("t3.medium"),
             vpc=vpc,
