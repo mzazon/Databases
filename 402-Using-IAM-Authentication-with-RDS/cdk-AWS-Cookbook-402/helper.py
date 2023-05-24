@@ -32,8 +32,8 @@ unsets = []
 sets = []
 
 outputs = response["Stacks"][0]["Outputs"]
-print("Copy and paste the commands below into your terminal")
-print("")
+#print("Copy and paste the commands below into your terminal")
+#print("")
 for output in outputs:
     if ', ' in output["OutputValue"]:
         sets.append(change_case(output["OutputKey"]) + "='" + ', '.join('"{}"'.format(word) for word in output["OutputValue"].split(", ")) + "'")
@@ -46,4 +46,4 @@ if (args.unset):
 else:
     print('\n'.join(map(str, sets)))
 
-print("")
+#print("")
