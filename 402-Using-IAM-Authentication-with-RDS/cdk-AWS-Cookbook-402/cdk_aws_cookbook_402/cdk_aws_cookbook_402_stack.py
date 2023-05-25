@@ -32,8 +32,8 @@ class CdkAwsCookbook402Stack(Stack):
         )
 
         isolated_subnets = ec2.SubnetConfiguration(
-            name="ISOLATED",
-            subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
+            name="PUBLIC",
+            subnet_type=ec2.SubnetType.PUBLIC,
             cidr_mask=24
         )
 
@@ -45,31 +45,6 @@ class CdkAwsCookbook402Stack(Stack):
             subnet_configuration=[isolated_subnets]
         )
 
-        vpc.add_interface_endpoint(
-            'VPCSecretsManagerInterfaceEndpoint',
-            service=ec2.InterfaceVpcEndpointAwsService('secretsmanager'),  # Find names with - aws ec2 describe-vpc-endpoint-services | jq '.ServiceNames'
-            private_dns_enabled=True,
-            subnets=ec2.SubnetSelection(
-                one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
-            ),
-        )
-
-        vpc.add_interface_endpoint(
-            'VPCRDSInterfaceEndpoint',
-            service=ec2.InterfaceVpcEndpointAwsService('rds'),  # Find names with - aws ec2 describe-vpc-endpoint-services | jq '.ServiceNames'
-            private_dns_enabled=True,
-            subnets=ec2.SubnetSelection(
-                one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
-            ),
-        )
-
-        vpc.add_gateway_endpoint(
-            's3GateWayEndPoint',
-            service=ec2.GatewayVpcEndpointAwsService('s3'),
-            subnets=[ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED)],
-        )
 
         rds_security_group = ec2.SecurityGroup(
             self,
@@ -91,44 +66,14 @@ class CdkAwsCookbook402Stack(Stack):
             instance_identifier='awscookbookrecipe402',
             delete_automated_backups=True,
             deletion_protection=False,
+            publicly_accessible=True,
             removal_policy=RemovalPolicy.DESTROY,
             allocated_storage=8,
             vpc_subnets=ec2.SubnetSelection(
                 one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
+                subnet_type=ec2.SubnetType.PUBLIC
             ),
             security_groups=[rds_security_group]
-        )
-
-        # -------- Begin EC2 Helper ---------
-        vpc.add_interface_endpoint(
-            'VPCSSMInterfaceEndpoint',
-            service=ec2.InterfaceVpcEndpointAwsService('ssm'),  # Find names with - aws ec2 describe-vpc-endpoint-services | jq '.ServiceNames'
-            private_dns_enabled=True,
-            subnets=ec2.SubnetSelection(
-                one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
-            ),
-        )
-
-        vpc.add_interface_endpoint(
-            'VPCEC2MessagesInterfaceEndpoint',
-            service=ec2.InterfaceVpcEndpointAwsService('ec2messages'),  # Find names with - aws ec2 describe-vpc-endpoint-services | jq '.ServiceNames'
-            private_dns_enabled=True,
-            subnets=ec2.SubnetSelection(
-                one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
-            ),
-        )
-
-        vpc.add_interface_endpoint(
-            'VPCSSMMessagesInterfaceEndpoint',
-            service=ec2.InterfaceVpcEndpointAwsService('ssmmessages'),  # Find names with - aws ec2 describe-vpc-endpoint-services | jq '.ServiceNames'
-            private_dns_enabled=True,
-            subnets=ec2.SubnetSelection(
-                one_per_az=False,
-                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
-            ),
         )
 
         ami = ec2.MachineImage.latest_amazon_linux(
@@ -204,7 +149,7 @@ class CdkAwsCookbook402Stack(Stack):
             value=s3_Bucket.bucket_name
         )
 
-        isolated_subnets = vpc.select_subnets(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED)
+        isolated_subnets = vpc.select_subnets(subnet_type=ec2.SubnetType.PUBLIC)
 
         CfnOutput(
             self,
